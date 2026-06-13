@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "aria-reach — ARIA anti-pattern scanner",
+  "version": "0.1.0",
+  "description": "Scan any page for the four ARIA anti-pattern classes and attribute findings to their likely upstream component library.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "aria-reach"
+  },
+  "permissions": ["activeTab", "scripting"]
+}

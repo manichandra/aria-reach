@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>aria-reach demo page — seeded ARIA anti-patterns</title>
+    <style>
+      body { font: 15px/1.6 system-ui, sans-serif; max-width: 760px; margin: 40px auto; padding: 0 16px; }
+      h1 { font-size: 22px; }
+      section { border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 16px; margin: 14px 0; }
+      .crumbs { list-style: none; display: flex; gap: 8px; padding: 0; }
+      .p-breadcrumb-chevron { color: #9ca3af; }
+      .save-status { color: #047857; min-height: 1em; }
+      .ql-picker-options div { padding: 2px 8px; }
+      td button { width: 36px; height: 28px; }
+    </style>
+  </head>
+  <body>
+    <h1>aria-reach demo page</h1>
+    <p>
+      This page seeds one instance of every detectable anti-pattern class.
+      Scan it with the browser extension ("Scan this page", then hover the
+      findings), or open DevTools and watch the auto-report from the script
+      loaded below.
+    </p>
+
+    <section aria-label="Class I — decorative noise">
+      <nav aria-label="Breadcrumb">
+        <ol class="crumbs">
+          <li><a href="#">Home</a></li>
+          <li><span class="p-breadcrumb-chevron">›</span></li>
+          <li><a href="#">Products</a></li>
+          <li><span class="p-breadcrumb-chevron">›</span></li>
+          <li>Demo</li>
+        </ol>
+      </nav>
+      <svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="6" fill="#a78bfa" /></svg>
+      decorative icon without aria treatment
+    </section>
+
+    <section aria-label="Class II — live region urgency">
+      <div aria-live="assertive" class="save-status">Draft saved at 09:41</div>
+    </section>
+
+    <section aria-label="Class III — widget role contracts">
+      <button aria-haspopup="listbox">Font</button>
+      <div role="listbox" class="ql-picker-options">
+        <div>Sans Serif</div>
+        <div>Serif</div>
+        <div>Monospace</div>
+      </div>
+
+      <table role="grid" aria-label="June 2026">
+        <tr role="row">
+          <td role="gridcell"><button aria-pressed="true">15</button></td>
+          <td role="gridcell"><button aria-pressed="false">16</button></td>
+        </tr>
+      </table>
+    </section>
+
+    <section aria-label="clean control — should produce no findings">
+      <nav aria-label="Breadcrumb (fixed)">
+        <ol class="crumbs">
+          <li><a href="#">Home</a></li>
+          <li><span class="p-breadcrumb-chevron" aria-hidden="true">›</span></li>
+          <li>Demo</li>
+        </ol>
+      </nav>
+      <div aria-live="polite">Draft saved at 09:42</div>
+    </section>
+
+    <script src="../dist/aria-reach.browser.js"></script>
+  </body>
+</html>

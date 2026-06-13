@@ -1,0 +1,56 @@
+{
+  "name": "aria-reach",
+  "version": "0.1.0",
+  "description": "Static analyzer for ARIA anti-patterns in shared component libraries, with npm reach (Library Reach Index) scoring. Reference implementation of the four-class ARIA anti-pattern taxonomy.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Manichandra Sajjanapu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/manichandra/aria-reach.git"
+  },
+  "bugs": {
+    "url": "https://github.com/manichandra/aria-reach/issues"
+  },
+  "homepage": "https://github.com/manichandra/aria-reach#readme",
+  "bin": {
+    "aria-reach": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "build:browser": "esbuild src/browser.ts --bundle --format=iife --target=es2020 --outfile=dist/aria-reach.browser.js",
+    "build:ext": "npm run build:browser && cp dist/aria-reach.browser.js browser-extension/aria-reach.browser.js",
+    "test": "npm run build && node --test test/",
+    "prepublishOnly": "npm test && npm run build:browser"
+  },
+  "dependencies": {
+    "parse5": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.21.0",
+    "typescript": "^5.4.0"
+  },
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "aria",
+    "wcag",
+    "section-508",
+    "lint",
+    "static-analysis",
+    "angular",
+    "component-library",
+    "screen-reader"
+  ]
+}

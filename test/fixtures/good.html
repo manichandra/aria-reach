@@ -1,0 +1,43 @@
+<!-- Fixture: remediated versions of every pattern in bad.html — expect zero findings -->
+
+<!-- Class I remediated: separator hidden from AT -->
+<nav aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><span class="p-breadcrumb-chevron" aria-hidden="true">›</span></li>
+    <li><a href="/products">Products</a></li>
+  </ol>
+</nav>
+
+<li class="menu-divider" aria-hidden="true"></li>
+
+<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><use href="#icon-chevron"></use></svg>
+
+<!-- Class II remediated: polite urgency for informational updates -->
+<div aria-live="polite" class="vjs-descriptions-text">Scene description text</div>
+<div role="status">File uploaded successfully</div>
+
+<!-- Class III remediated: full W3C listbox pattern (trigger + container + options) -->
+<button aria-haspopup="listbox" aria-expanded="false">Font</button>
+<div role="listbox" class="ql-picker-options" aria-label="Font family">
+  <div class="ql-picker-item" role="option" aria-selected="true">Sans Serif</div>
+  <div class="ql-picker-item" role="option" aria-selected="false">Serif</div>
+</div>
+
+<ul role="listbox" aria-label="Font size">
+  <li role="option" aria-selected="true">Small</li>
+  <li role="option" aria-selected="false">Large</li>
+</ul>
+
+<!-- Class III remediated: selection semantics on the gridcell, no toggle-button state -->
+<table role="grid" aria-label="June 2026">
+  <tr role="row">
+    <td role="gridcell" aria-selected="true"><button>15</button></td>
+  </tr>
+</table>
+
+<!-- Class IV remediated: submission deferred until async validators settle -->
+<form [formGroup]="registrationForm" [awaitAsyncValidators]="true" (ngSubmit)="onSubmit()">
+  <input formControlName="email" type="email" />
+  <button type="submit">Register</button>
+</form>

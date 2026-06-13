@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        font: 13px/1.45 -apple-system, system-ui, sans-serif;
+        width: 380px;
+        margin: 0;
+        padding: 12px;
+        color: #1f2937;
+      }
+      h1 {
+        font-size: 14px;
+        margin: 0 0 8px;
+      }
+      h1 .brand {
+        background: #5b21b6;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      button {
+        background: #5b21b6;
+        color: #fff;
+        border: 0;
+        border-radius: 6px;
+        padding: 7px 14px;
+        font-size: 13px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #6d28d9;
+      }
+      #summary {
+        margin: 10px 0 6px;
+        font-weight: 600;
+      }
+      .pill {
+        display: inline-block;
+        border-radius: 10px;
+        padding: 1px 8px;
+        margin: 2px 4px 2px 0;
+        font-size: 12px;
+        background: #ede9fe;
+        cursor: help;
+      }
+      .pill.cls {
+        background: #fef3c7;
+      }
+      .hint {
+        font-weight: 400;
+        margin-top: 4px;
+      }
+      .finding[data-id] {
+        cursor: pointer;
+      }
+      .finding[data-id]:hover {
+        background: #f5f3ff;
+      }
+      .finding {
+        border-top: 1px solid #e5e7eb;
+        padding: 7px 0;
+      }
+      .finding .meta {
+        font-weight: 600;
+      }
+      .sev-error { color: #b91c1c; }
+      .sev-warning { color: #b45309; }
+      .sev-info { color: #0369a1; }
+      .origin {
+        color: #5b21b6;
+        font-weight: 600;
+      }
+      .selector {
+        color: #6b7280;
+        font-family: ui-monospace, monospace;
+        font-size: 11px;
+        word-break: break-all;
+      }
+      .msg { margin-top: 2px; }
+      .muted { color: #6b7280; }
+    </style>
+  </head>
+  <body>
+    <h1><span class="brand">aria-reach</span> runtime scanner</h1>
+    <button id="scan">Scan this page</button>
+    <button id="highlight" style="display: none">Highlight all on page</button>
+    <div id="summary" class="muted">
+      Scans the live DOM for the four ARIA anti-pattern classes and attributes
+      each finding to its likely upstream component library.
+    </div>
+    <div id="results"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

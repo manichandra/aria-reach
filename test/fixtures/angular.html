@@ -1,0 +1,17 @@
+<!-- Fixture: Angular binding syntax must be recognized as attribute presence -->
+
+<!-- Bound aria-hidden counts as handled: no Class I finding -->
+<span class="chevron" [attr.aria-hidden]="isDecorative">›</span>
+
+<!-- Bound aria-live value is unknowable statically: no Class II finding -->
+<div [attr.aria-live]="urgency">Status text</div>
+
+<!-- Bound role is unknowable statically: no Class III finding -->
+<div [role]="containerRole">
+  <div>Item</div>
+</div>
+
+<!-- Class IV heuristic still applies: exactly one info finding expected -->
+<form (ngSubmit)="save()">
+  <input name="email" />
+</form>

@@ -1,0 +1,50 @@
+<!-- Fixture: one instance of every detectable anti-pattern class -->
+
+<!-- Class I: decorative separator exposed to AT (PrimeNG breadcrumb case) -->
+<nav aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    <li><span class="p-breadcrumb-chevron">›</span></li>
+    <li><a href="/products">Products</a></li>
+  </ol>
+</nav>
+
+<!-- Class I: separator hinted by class name, not hidden -->
+<li class="menu-divider"></li>
+
+<!-- Class I: decorative svg with no aria treatment -->
+<svg viewBox="0 0 16 16"><use href="#icon-chevron"></use></svg>
+
+<!-- Class II: assertive live region for non-urgent content (Video.js case) -->
+<div aria-live="assertive" class="vjs-descriptions-text">Scene description text</div>
+
+<!-- Class II: role=alert needing urgency review -->
+<div role="alert">File uploaded successfully</div>
+
+<!-- Class III: listbox container without options (Quill picker case) -->
+<div role="listbox" class="ql-picker-options">
+  <div class="ql-picker-item">Sans Serif</div>
+  <div class="ql-picker-item">Serif</div>
+</div>
+
+<!-- Class III: option missing aria-selected -->
+<ul role="listbox" aria-label="Font size">
+  <li role="option" aria-selected="true">Small</li>
+  <li role="option">Large</li>
+</ul>
+
+<!-- Class III: aria-pressed in a selection context (Angular Material calendar case) -->
+<table role="grid" aria-label="June 2026">
+  <tr role="row">
+    <td role="gridcell"><button aria-pressed="true">15</button></td>
+  </tr>
+</table>
+
+<!-- Class III: popup trigger without expanded state -->
+<button aria-haspopup="listbox">Font</button>
+
+<!-- Class IV: ngSubmit without awaitAsyncValidators (Angular Forms case) -->
+<form [formGroup]="registrationForm" (ngSubmit)="onSubmit()">
+  <input formControlName="email" type="email" />
+  <button type="submit">Register</button>
+</form>
