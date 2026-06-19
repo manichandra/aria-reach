@@ -1,7 +1,7 @@
 {
   "name": "aria-reach",
   "version": "0.1.1",
-  "description": "Static analyzer for ARIA anti-patterns in shared component libraries, with npm reach (Library Reach Index) scoring. Reference implementation of the four-class ARIA anti-pattern taxonomy.",
+  "description": "A static and runtime accessibility analyzer that detects ARIA anti-patterns in shared web component libraries and ranks them by downstream reach (Library Reach Index), so teams fix the issues affecting the most assistive-technology users first. Aids WCAG 2.1 and Section 508 accessibility review; reference implementation of the four-class ARIA anti-pattern taxonomy.",
   "type": "module",
   "license": "MIT",
   "author": "Manichandra Sajjanapu",

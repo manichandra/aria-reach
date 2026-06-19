@@ -1,6 +1,6 @@
 {
-  "title": "aria-reach: Static analyzer for ARIA anti-patterns in shared component libraries",
-  "description": "A static analyzer for ARIA anti-patterns in shared component libraries, with npm reach scoring (Library Reach Index) to prioritize the upstream fixes that help the most assistive-technology users. Reference implementation of the four-class ARIA anti-pattern taxonomy.",
+  "title": "aria-reach: ARIA accessibility anti-pattern analyzer for shared component libraries",
+  "description": "A static and runtime accessibility analyzer that detects ARIA anti-patterns in shared web component libraries and ranks them by downstream reach (Library Reach Index), so teams fix the issues affecting the most assistive-technology users first. Aids WCAG 2.1 and Section 508 accessibility review; reference implementation of the four-class ARIA anti-pattern taxonomy.",
   "upload_type": "software",
   "access_right": "open",
   "license": "MIT",
