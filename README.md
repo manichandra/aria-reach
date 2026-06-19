@@ -12,6 +12,13 @@ Most accessibility checkers audit *applications*. `aria-reach` targets the layer
 npm install -g aria-reach   # or: npx aria-reach ...
 ```
 
+**Build from source** (for contributors):
+```bash
+git clone https://github.com/manichandra/aria-reach.git
+cd aria-reach && npm install && npm run build
+node dist/cli.js scan src/
+```
+
 **New here? Follow the worked example in [GETTING_STARTED.md](GETTING_STARTED.md).**
 
 ## Scan templates for anti-patterns
@@ -22,6 +29,26 @@ aria-reach scan src/ --json           # machine-readable output
 ```
 
 Exit code is `1` when any error-severity finding is reported, so it can gate CI.
+
+### Use in CI (GitHub Action)
+
+```yaml
+# .github/workflows/accessibility.yml
+name: accessibility
+on: [push, pull_request]
+jobs:
+  aria-reach:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: manichandra/aria-reach@v0.1.1
+        with:
+          path: src            # file(s)/dir(s) to scan, space-separated
+          # json: true         # machine-readable output
+          # fail-on-error: false   # report-only, don't fail the job
+```
+
+The job fails when any error-severity ARIA finding is reported. GitHub-hosted runners already include Node ≥ 18.
 
 Angular binding syntax is understood: `[attr.aria-hidden]="expr"` counts as the attribute being handled, and statically-unknowable bound values are never false-flagged. Inline component templates (`template: \`…\``) are extracted from `.ts`/`.js` sources with line numbers mapped back to the source file — scanning PrimeNG's real library source yields 172 findings across 51 component files.
 

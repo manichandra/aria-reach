@@ -1,0 +1,22 @@
+{
+  "title": "aria-reach: Static analyzer for ARIA anti-patterns in shared component libraries",
+  "description": "A static analyzer for ARIA anti-patterns in shared component libraries, with npm reach scoring (Library Reach Index) to prioritize the upstream fixes that help the most assistive-technology users. Reference implementation of the four-class ARIA anti-pattern taxonomy.",
+  "upload_type": "software",
+  "access_right": "open",
+  "license": "MIT",
+  "creators": [
+    {
+      "name": "Sajjanapu, Manichandra"
+    }
+  ],
+  "keywords": [
+    "accessibility",
+    "a11y",
+    "aria",
+    "wcag",
+    "section-508",
+    "static-analysis",
+    "component-library",
+    "screen-reader"
+  ]
+}

@@ -90,6 +90,11 @@ export class ElementInfo {
     return list?.find((a) => a.kind === 'static')?.value;
   }
 
+  /** Value as written — static literal or binding expression — if present. */
+  rawValue(name: string): string | undefined {
+    return this.attrs.get(name.toLowerCase())?.[0]?.value;
+  }
+
   /** Concatenated text content of this element and its descendants. */
   text(): string {
     let out = this.ownText.join('');

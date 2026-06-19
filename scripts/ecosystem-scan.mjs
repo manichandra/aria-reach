@@ -30,7 +30,7 @@ const LIBS = [
   { pkg: '@clr/angular', gh: 'vmware-clarity/ng-clarity', srcCandidates: ['projects/angular/src', 'projects/angular', 'projects'] },
 ];
 
-const TEST_FILE_RE = /\.spec\.|\.stories\.|\/(test|tests|testing|e2e|__tests__|fixtures|schematics)\//;
+const TEST_FILE_RE = /\.spec\.|\.stories\.|\/(test|tests|testing|e2e|__tests__|fixtures|schematics|demo|demos|docs|documentation|example|examples)\//;
 
 async function defaultBranch(gh) {
   const res = await fetch(`https://api.github.com/repos/${gh}`);

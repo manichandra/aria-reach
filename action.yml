@@ -1,0 +1,38 @@
+name: 'aria-reach — ARIA anti-pattern scan'
+description: 'Scan templates for ARIA anti-patterns in shared component libraries, ranked by downstream reach. Fails CI on error-severity findings.'
+author: 'Manichandra Sajjanapu'
+branding:
+  icon: 'eye'
+  color: 'purple'
+inputs:
+  path:
+    description: 'File(s) or director(ies) to scan, space-separated.'
+    required: false
+    default: '.'
+  json:
+    description: 'Emit machine-readable JSON output.'
+    required: false
+    default: 'false'
+  version:
+    description: 'aria-reach version to run (npm version or dist-tag, e.g. "latest" or "0.1.0").'
+    required: false
+    default: 'latest'
+  fail-on-error:
+    description: 'Fail the job when error-severity findings are reported. Set "false" for report-only.'
+    required: false
+    default: 'true'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run aria-reach scan
+      shell: bash
+      run: |
+        FLAGS=""
+        if [ "${{ inputs.json }}" = "true" ]; then FLAGS="--json"; fi
+        echo "::group::aria-reach scan ${{ inputs.path }}"
+        if [ "${{ inputs.fail-on-error }}" = "true" ]; then
+          npx --yes "aria-reach@${{ inputs.version }}" scan ${{ inputs.path }} $FLAGS
+        else
+          npx --yes "aria-reach@${{ inputs.version }}" scan ${{ inputs.path }} $FLAGS || true
+        fi
+        echo "::endgroup::"

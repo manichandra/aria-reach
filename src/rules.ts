@@ -13,6 +13,8 @@ export interface ScannableElement {
   has(name: string): boolean;
   hasBinding(name: string): boolean;
   staticValue(name: string): string | undefined;
+  /** Value as written — static literal or binding expression — if present. */
+  rawValue(name: string): string | undefined;
   text(): string;
   ancestors(): Iterable<ScannableElement>;
   descendants(): Iterable<ScannableElement>;
@@ -57,6 +59,23 @@ function hasInteractiveDescendant(el: ScannableElement): boolean {
   return false;
 }
 
+function hasInteractiveAncestor(el: ScannableElement): boolean {
+  for (const a of el.ancestors()) {
+    if (a.tag === 'a' || a.tag === 'button') return true;
+    if ((a.staticValue('role') ?? '').toLowerCase() === 'button') return true;
+  }
+  return false;
+}
+
+/**
+ * Class hints that mark a role="option" element as a *non-selectable* row
+ * (group label, empty/"no results" message, input chip). Those are a
+ * role-misuse smell, not a missing-aria-selected defect — the right fix is a
+ * different role, so the "add aria-selected" remediation would be wrong advice.
+ */
+const NON_OPTION_HINT =
+  /(group|empty|message|chip|header|placeholder|no-?result|loading|separator|divider)/i;
+
 /**
  * Class I — Decorative Noise Injection.
  * Separator glyphs / decorative elements exposed to the accessibility tree.
@@ -65,10 +84,14 @@ function hasInteractiveDescendant(el: ScannableElement): boolean {
 const decorativeSeparator: Rule = {
   id: 'decorative-separator-aria-hidden',
   cls: 'I',
-  defaultSeverity: 'error',
+  defaultSeverity: 'warning',
   check(el) {
     if (el.has('aria-hidden') || el.has('aria-label') || el.has('aria-labelledby')) return null;
     if (hasInteractiveDescendant(el)) return null;
+    // A glyph inside a button/link is the control's (possibly only) accessible
+    // name, not an inline separator. Hiding it could leave the control unnamed —
+    // that is icon-button territory, out of scope for this rule.
+    if (hasInteractiveAncestor(el)) return null;
 
     const text = el.text().trim();
     const isLeaf = el.children.length === 0;
@@ -156,6 +179,11 @@ const listboxMissingOptions: Rule = {
       const role = (d.staticValue('role') ?? '').toLowerCase();
       if (role === 'option') return null;
       if (d.hasBinding('role')) sawRoleBinding = true;
+      // Options are almost always projected (<ng-content>) or supplied by a
+      // wrapper component (<mat-option>, <nb-option>, …) whose internal
+      // role="option" is invisible to static analysis. We cannot assert the
+      // contract is broken in those cases — that is a runtime-only check.
+      if (d.tag === 'ng-content' || d.tag.includes('-')) return null;
     }
     if (sawRoleBinding) return null; // option role may be assigned dynamically
     return {
@@ -175,7 +203,12 @@ const optionMissingSelected: Rule = {
   defaultSeverity: 'error',
   check(el) {
     if ((el.staticValue('role') ?? '').toLowerCase() !== 'option') return null;
-    if (el.has('aria-selected')) return null;
+    if (el.has('aria-selected')) return null; // static or bound aria-selected satisfies the contract
+    // Suppress role="option" on non-selectable rows (group label, empty/"no
+    // results" message, input chip). Their identity lives in bound class/id
+    // expressions; "add aria-selected" is the wrong remediation for them.
+    const hint = `${el.rawValue('class') ?? ''} ${el.rawValue('id') ?? ''}`;
+    if (NON_OPTION_HINT.test(hint)) return null;
     return {
       message:
         `role="option" without aria-selected: screen readers cannot announce selection state ` +

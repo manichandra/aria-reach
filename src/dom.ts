@@ -36,6 +36,10 @@ export class DomElementInfo implements ScannableElement {
     return this.element.getAttribute(name) ?? undefined;
   }
 
+  rawValue(name: string): string | undefined {
+    return this.element.getAttribute(name) ?? undefined;
+  }
+
   text(): string {
     return this.element.textContent ?? '';
   }

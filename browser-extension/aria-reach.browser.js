@@ -53,13 +53,22 @@
     }
     return false;
   }
+  function hasInteractiveAncestor(el) {
+    for (const a of el.ancestors()) {
+      if (a.tag === "a" || a.tag === "button") return true;
+      if ((a.staticValue("role") ?? "").toLowerCase() === "button") return true;
+    }
+    return false;
+  }
+  var NON_OPTION_HINT = /(group|empty|message|chip|header|placeholder|no-?result|loading|separator|divider)/i;
   var decorativeSeparator = {
     id: "decorative-separator-aria-hidden",
     cls: "I",
-    defaultSeverity: "error",
+    defaultSeverity: "warning",
     check(el) {
       if (el.has("aria-hidden") || el.has("aria-label") || el.has("aria-labelledby")) return null;
       if (hasInteractiveDescendant(el)) return null;
+      if (hasInteractiveAncestor(el)) return null;
       const text = el.text().trim();
       const isLeaf = el.children.length === 0;
       if (isLeaf && TEXT_SEPARATOR_TAGS.has(el.tag) && text.length > 0 && text.length <= 3 && SEPARATOR_GLYPHS.has(text)) {
@@ -120,6 +129,7 @@
         const role = (d.staticValue("role") ?? "").toLowerCase();
         if (role === "option") return null;
         if (d.hasBinding("role")) sawRoleBinding = true;
+        if (d.tag === "ng-content" || d.tag.includes("-")) return null;
       }
       if (sawRoleBinding) return null;
       return {
@@ -134,6 +144,8 @@
     check(el) {
       if ((el.staticValue("role") ?? "").toLowerCase() !== "option") return null;
       if (el.has("aria-selected")) return null;
+      const hint = `${el.rawValue("class") ?? ""} ${el.rawValue("id") ?? ""}`;
+      if (NON_OPTION_HINT.test(hint)) return null;
       return {
         message: `role="option" without aria-selected: screen readers cannot announce selection state (WAI-ARIA required state; WCAG SC 4.1.2; Class III \u2014 Widget Role Contract Violation).`
       };
@@ -216,6 +228,9 @@
       return false;
     }
     staticValue(name) {
+      return this.element.getAttribute(name) ?? void 0;
+    }
+    rawValue(name) {
       return this.element.getAttribute(name) ?? void 0;
     }
     text() {
