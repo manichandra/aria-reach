@@ -29,7 +29,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "build:browser": "esbuild src/browser.ts --bundle --format=iife --target=es2020 --outfile=dist/aria-reach.browser.js",
-    "build:ext": "npm run build:browser && cp dist/aria-reach.browser.js browser-extension/aria-reach.browser.js",
+    "build:ext": "npm run build:browser && cp dist/aria-reach.browser.js browser-extension/aria-reach.browser.js && cp dist/aria-reach.browser.js docs/aria-reach.browser.js",
     "test": "npm run build && node --test test/",
     "prepublishOnly": "npm test && npm run build:browser"
   },

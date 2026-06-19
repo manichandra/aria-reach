@@ -6,7 +6,7 @@ Most accessibility checkers audit *applications*. `aria-reach` targets the layer
 
 `aria-reach` is the reference implementation of the four-class ARIA anti-pattern taxonomy from the paper *"ARIA Anti-Patterns in Shared Component Libraries: A Taxonomy and Force-Multiplied Remediation Strategy for Screen Reader Accessibility"* (under review; preprint link forthcoming). Each rule is grounded in a real upstream contribution to a major library.
 
-**[Try the live browser demo](https://manichandra.github.io/aria-reach/demo/)** — scan a seeded page and inspect each finding without installing anything.
+**[Try the live browser demo](https://manichandra.github.io/aria-reach/)** — scan a seeded page and inspect each finding without installing anything.
 
 ## Install
 
