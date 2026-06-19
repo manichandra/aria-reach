@@ -351,6 +351,9 @@
   var tooltipEl = null;
   var overlayListener = null;
   function tagFindings(findings) {
+    for (const el of Array.from(document.querySelectorAll(`[${ATTR}]`))) {
+      el.removeAttribute(ATTR);
+    }
     lastFindings = findings;
     findings.forEach((f, i) => {
       f.element.setAttribute(ATTR, String(i));

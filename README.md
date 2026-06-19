@@ -2,7 +2,7 @@
 
 Static analyzer for **ARIA anti-patterns in shared component libraries**, with npm **reach scoring** to prioritize the fixes that help the most assistive-technology users.
 
-Most accessibility checkers audit *applications*. `aria-reach` targets the layer above them: the shared component libraries (UI kits, editors, media players, form frameworks) whose ARIA defects silently propagate into every downstream application that imports them. One upstream fix repairs every consumer at once — so that is where audit effort pays off most.
+Most accessibility checkers audit *applications*. `aria-reach` targets the layer above them: the shared component libraries (UI kits, editors, media players, form frameworks) whose ARIA defects can propagate into downstream applications. A confirmed upstream fix can benefit many consumers as they adopt the corrected release — so that is where audit effort can pay off most.
 
 `aria-reach` is the reference implementation of the four-class ARIA anti-pattern taxonomy from the paper *"ARIA Anti-Patterns in Shared Component Libraries: A Taxonomy and Force-Multiplied Remediation Strategy for Screen Reader Accessibility"* (under review; preprint link forthcoming). Each rule is grounded in a real upstream contribution to a major library.
 
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: manichandra/aria-reach@v0.1.1
+      - uses: manichandra/aria-reach@v0.1.2
         with:
           path: src            # file(s)/dir(s) to scan, space-separated
           # json: true         # machine-readable output
@@ -54,7 +54,7 @@ Angular binding syntax is understood: `[attr.aria-hidden]="expr"` counts as the 
 
 ## Scan any live page — runtime mode (framework-agnostic)
 
-The same rules run against the rendered DOM of **any** app (React, Vue, Angular, vanilla — at runtime it's all DOM), with **upstream library attribution**: findings are labeled with their likely origin (PrimeNG, Angular Material, Quill, Video.js, USWDS, MUI, Ant Design, …) so they can be fixed upstream where one fix reaches every consumer.
+The runtime-detectable rules (Classes I–III) run against the rendered DOM of **any** app (React, Vue, Angular, vanilla — at runtime it's all DOM). When a finding or one of its ancestors has a recognized DOM fingerprint, it is labeled with a **likely** origin (PrimeNG, Angular Material, Quill, Video.js, USWDS, MUI, Ant Design, …). Attribution is heuristic and requires confirmation before proposing an upstream fix. The Angular-specific Class IV rule remains static-only because event bindings are compiled away at runtime.
 
 - **Console snippet:** paste `dist/aria-reach.browser.js` (built via `npm run build:browser`) into any DevTools console → grouped report + `window.ariaReach.scan()/.report()/.summary()`. Works in Chrome, Edge, Firefox, and Safari.
 - **Browser extension:** `npm run build:ext`, then load [browser-extension/](browser-extension/) unpacked in Chrome; Safari via Xcode's `safari-web-extension-converter`. See [browser-extension/README.md](browser-extension/README.md).

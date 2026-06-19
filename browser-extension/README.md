@@ -1,11 +1,14 @@
 # aria-reach browser extension
 
 Runtime companion to the `aria-reach` CLI: scans the **live DOM** of any page
-(any framework — React, Vue, Angular, vanilla) for the four ARIA anti-pattern
-classes, and attributes each finding to its **likely upstream component
-library** (PrimeNG, Angular Material, Quill, Video.js, USWDS, MUI, Ant
-Design, …) so defects can be fixed upstream where one fix reaches every
-downstream consumer.
+(any framework — React, Vue, Angular, vanilla) for runtime-detectable ARIA
+anti-patterns in Classes I–III. When an affected element or ancestor contains
+a recognized DOM fingerprint, the extension labels its **likely upstream
+component library** (PrimeNG, Angular Material, Quill, Video.js, USWDS, MUI,
+Ant Design, …). Attribution is heuristic and requires confirmation.
+
+The Angular-specific Class IV rule is available only in the static CLI because
+Angular event bindings are compiled away in the live DOM.
 
 ## Build
 

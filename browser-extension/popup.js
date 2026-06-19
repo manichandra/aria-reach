@@ -1,6 +1,7 @@
 const summaryEl = document.getElementById('summary');
 const resultsEl = document.getElementById('results');
 const highlightBtn = document.getElementById('highlight');
+const scanBtn = document.getElementById('scan');
 
 let currentTabId = null;
 let overlayOn = false;
@@ -17,16 +18,35 @@ async function inPage(func, args = []) {
   return result;
 }
 
-document.getElementById('scan').addEventListener('click', async () => {
+scanBtn.addEventListener('click', async () => {
+  scanBtn.disabled = true;
+  scanBtn.textContent = 'Scanning…';
   summaryEl.textContent = 'Scanning…';
   resultsEl.innerHTML = '';
+  overlayOn = false;
+  highlightBtn.style.display = 'none';
+  highlightBtn.textContent = 'Highlight all on page';
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab || typeof tab.id !== 'number') throw new Error('No active tab is available.');
     currentTabId = tab.id;
-    await chrome.scripting.executeScript({
-      target: { tabId: currentTabId },
-      files: ['aria-reach.browser.js'],
-    });
+    const scannerLoaded = await inPage(
+      () =>
+        Boolean(
+          window.ariaReach &&
+          typeof window.ariaReach.summary === 'function' &&
+          typeof window.ariaReach.highlight === 'function' &&
+          typeof window.ariaReach.clearHighlights === 'function',
+        ),
+    );
+    if (scannerLoaded) {
+      await inPage(() => window.ariaReach.clearHighlights());
+    } else {
+      await chrome.scripting.executeScript({
+        target: { tabId: currentTabId },
+        files: ['aria-reach.browser.js'],
+      });
+    }
     const summary = await inPage(() => window.ariaReach.summary());
     render(summary);
     highlightBtn.style.display = 'inline-block';
@@ -34,6 +54,9 @@ document.getElementById('scan').addEventListener('click', async () => {
     summaryEl.textContent =
       'Could not scan this page (browser-internal pages and the extension store are not scannable). ' +
       String(err && err.message ? err.message : err);
+  } finally {
+    scanBtn.disabled = false;
+    scanBtn.textContent = 'Scan this page';
   }
 });
 
@@ -64,7 +87,7 @@ function render(summary) {
     .map(([cls, n]) => {
       const key = cls.replace('Class ', '');
       const info = summary.classInfo[key];
-      return `<span class="pill cls" title="${esc(info.name)}: ${esc(info.description)}">${esc(cls)} · ${esc(info.name)}: ${n}</span>`;
+      return `<span class="pill cls" tabindex="0" title="${esc(info.name)}: ${esc(info.description)}">${esc(cls)} · ${esc(info.name)}: ${n}</span>`;
     })
     .join('');
 
@@ -73,14 +96,14 @@ function render(summary) {
     .sort((a, b) => b[1] - a[1])
     .map(
       ([origin, n]) =>
-        `<span class="pill" title="Findings whose nearest fingerprinted ancestor matches ${esc(origin)} — candidates for an upstream fix rather than per-app workarounds.">${esc(origin)}: ${n}</span>`,
+        `<span class="pill" tabindex="0" title="Findings whose nearest fingerprinted ancestor matches ${esc(origin)}. This is a heuristic that requires confirmation.">${esc(origin)}: ${n}</span>`,
     )
     .join('');
 
   const rows = summary.findings
     .map(
       (f) => `
-      <div class="finding" data-id="${f.id}" title="${esc(f.message)}">
+      <div class="finding" data-id="${f.id}" tabindex="0" title="${esc(f.message)}">
         <div class="meta">
           <span class="sev-${esc(f.severity)}">${esc(f.severity)}</span>
           <span title="${esc(f.className)}: ${esc(summary.classInfo[f.cls].description)}">[Class ${esc(f.cls)}]</span>
@@ -107,6 +130,12 @@ function render(summary) {
       inPage((findingId) => window.ariaReach.highlightFinding(findingId), [id]).catch(() => {});
     });
     card.addEventListener('mouseleave', () => {
+      inPage(() => window.ariaReach.clearHighlight()).catch(() => {});
+    });
+    card.addEventListener('focus', () => {
+      inPage((findingId) => window.ariaReach.highlightFinding(findingId), [id]).catch(() => {});
+    });
+    card.addEventListener('blur', () => {
       inPage(() => window.ariaReach.clearHighlight()).catch(() => {});
     });
   }

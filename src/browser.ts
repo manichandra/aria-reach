@@ -66,6 +66,11 @@ let tooltipEl: HTMLDivElement | null = null;
 let overlayListener: ((e: Event) => void) | null = null;
 
 function tagFindings(findings: DomFinding[]): void {
+  // A page may be scanned repeatedly as its DOM changes. Remove old IDs first
+  // so highlightFinding() cannot select a stale element from a previous scan.
+  for (const el of Array.from(document.querySelectorAll(`[${ATTR}]`))) {
+    el.removeAttribute(ATTR);
+  }
   lastFindings = findings;
   findings.forEach((f, i) => {
     f.element.setAttribute(ATTR, String(i));

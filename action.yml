@@ -1,5 +1,5 @@
 name: 'aria-reach — ARIA anti-pattern scan'
-description: 'Scan templates for ARIA anti-patterns in shared component libraries, ranked by downstream reach. Fails CI on error-severity findings.'
+description: 'Scan templates for ARIA accessibility anti-patterns and fail CI on error-severity findings.'
 author: 'Manichandra Sajjanapu'
 branding:
   icon: 'eye'
@@ -14,7 +14,7 @@ inputs:
     required: false
     default: 'false'
   version:
-    description: 'aria-reach version to run (npm version or dist-tag, e.g. "latest" or "0.1.0").'
+    description: 'aria-reach version to run (npm version or dist-tag, e.g. "latest" or "0.1.1").'
     required: false
     default: 'latest'
   fail-on-error:

@@ -1,9 +1,9 @@
 import { allRules, type ScannableElement, type Severity, type AntiPatternClass } from './rules.js';
 
 /**
- * Live-DOM adapter: lets the same rules that scan template source run against
- * the rendered DOM of any page — framework-agnostic, because at runtime
- * React/Vue/Angular/vanilla all produce plain DOM.
+ * Live-DOM adapter: lets the runtime-capable rules scan the rendered DOM of
+ * any page — framework-agnostic, because at runtime React/Vue/Angular/vanilla
+ * all produce plain DOM.
  *
  * Notes vs. static scanning:
  *  - Angular bindings are compiled away at runtime, so hasBinding() is always
@@ -61,9 +61,8 @@ export class DomElementInfo implements ScannableElement {
 
 /**
  * Component-library fingerprints: identify the *likely upstream origin* of a
- * finding from tag names and class prefixes, so violations can be attributed
- * to the shared library rather than the application — and fixed upstream,
- * where one fix reaches every downstream consumer.
+ * finding from tag names and class prefixes. This is a heuristic candidate
+ * for manual confirmation, not proof of package-level provenance.
  */
 const LIBRARY_FINGERPRINTS: { pattern: RegExp; library: string }[] = [
   { pattern: /^(p-|ui-)/, library: 'PrimeNG / PrimeFaces' },

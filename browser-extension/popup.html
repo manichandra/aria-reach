@@ -32,6 +32,10 @@
       button:hover {
         background: #6d28d9;
       }
+      button:disabled {
+        background: #9ca3af;
+        cursor: wait;
+      }
       #summary {
         margin: 10px 0 6px;
         font-weight: 600;
@@ -47,6 +51,11 @@
       }
       .pill.cls {
         background: #fef3c7;
+      }
+      .pill:focus,
+      .finding[data-id]:focus {
+        outline: 2px solid #7c3aed;
+        outline-offset: 2px;
       }
       .hint {
         font-weight: 400;
@@ -86,9 +95,9 @@
     <h1><span class="brand">aria-reach</span> runtime scanner</h1>
     <button id="scan">Scan this page</button>
     <button id="highlight" style="display: none">Highlight all on page</button>
-    <div id="summary" class="muted">
-      Scans the live DOM for the four ARIA anti-pattern classes and attributes
-      each finding to its likely upstream component library.
+    <div id="summary" class="muted" role="status" aria-live="polite">
+      Scans the live DOM for ARIA anti-patterns and identifies a likely
+      component-library origin when a recognized DOM fingerprint is present.
     </div>
     <div id="results"></div>
     <script src="popup.js"></script>
