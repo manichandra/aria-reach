@@ -61,9 +61,26 @@ export interface ScanSummary {
 
 const ATTR = 'data-aria-reach-id';
 let lastFindings: DomFinding[] = [];
+// Last serializable summary, so the extension popup can restore its view on
+// reopen without forcing a rescan. Lives with the page, so a page reload
+// (which wipes window.ariaReach) naturally invalidates it.
+let lastSummaryCache: ScanSummary | null = null;
 const savedOutlines = new Map<HTMLElement, string>();
 let tooltipEl: HTMLDivElement | null = null;
 let overlayListener: ((e: Event) => void) | null = null;
+// Teardown for a pinned finding (scroll/resize/click listeners + outline + tooltip).
+let pinCleanup: (() => void) | null = null;
+// Id of the currently pinned finding, so the popup can restore its selected
+// state on reopen. Null when nothing is pinned.
+let pinnedId: number | null = null;
+
+function clearPin(): void {
+  if (pinCleanup) {
+    const fn = pinCleanup;
+    pinCleanup = null;
+    fn();
+  }
+}
 
 function tagFindings(findings: DomFinding[]): void {
   // A page may be scanned repeatedly as its DOM changes. Remove old IDs first
@@ -90,10 +107,31 @@ function ensureTooltip(): HTMLDivElement {
   return el;
 }
 
-function showTooltipFor(target: Element, finding: DomFinding): void {
+function showTooltipFor(
+  target: Element,
+  finding: DomFinding,
+  opts: { onClose?: () => void } = {},
+): void {
   const tip = ensureTooltip();
   const info = CLASS_INFO[finding.cls];
   tip.textContent = '';
+  // Pinned tooltips get a clickable ✕; hover tooltips stay click-through.
+  tip.style.pointerEvents = opts.onClose ? 'auto' : 'none';
+  tip.style.paddingRight = opts.onClose ? '24px' : '10px';
+  if (opts.onClose) {
+    const close = document.createElement('button');
+    close.type = 'button';
+    close.setAttribute('aria-label', 'Dismiss');
+    close.textContent = '×';
+    close.style.cssText =
+      'position:absolute;top:1px;right:3px;background:none;border:none;color:#9ca3af;' +
+      'font:700 16px/1 system-ui,sans-serif;cursor:pointer;padding:2px 4px';
+    close.addEventListener('click', (e) => {
+      e.stopPropagation();
+      opts.onClose?.();
+    });
+    tip.appendChild(close);
+  }
   const head = document.createElement('div');
   head.style.cssText = `font-weight:700;color:${SEVERITY_COLORS[finding.severity] ?? '#fff'};margin-bottom:3px`;
   head.textContent = `${finding.severity.toUpperCase()} · ${finding.ruleId} · Class ${finding.cls} (${info.name})`;
@@ -171,15 +209,34 @@ const api = {
   summary(root: Document | Element = document): ScanSummary {
     const findings = scanDom(root);
     tagFindings(findings);
-    return summarize(findings);
+    lastSummaryCache = summarize(findings);
+    return lastSummaryCache;
+  },
+
+  /** Cached summary from the last scan(), or null if the page hasn't been scanned. */
+  lastSummary(): ScanSummary | null {
+    return lastSummaryCache;
+  },
+
+  /** Whether overlay mode (highlight-all) is currently active on the page. */
+  isOverlayOn(): boolean {
+    return overlayListener !== null;
+  },
+
+  /** Id of the finding currently pinned on the page, or null if none. */
+  pinnedFinding(): number | null {
+    return pinnedId;
   },
 
   /** Outline + scroll to one finding (popup hover). */
   highlightFinding(id: number): void {
     restoreOutlines();
-    const el = document.querySelector(`[${ATTR}="${String(id)}"]`);
+    // Resolve via the cached finding's own element reference, not the DOM tag —
+    // clearHighlights() (Remove highlights) strips the tags, but the element
+    // references in lastFindings survive.
     const finding = lastFindings[id];
-    if (!el || !finding) return;
+    const el = finding?.element;
+    if (!el || !finding || !document.contains(el)) return;
     outlineElement(el, finding.severity);
     el.scrollIntoView({ block: 'center', behavior: 'smooth' });
     showTooltipFor(el, finding);
@@ -187,8 +244,48 @@ const api = {
 
   /** Remove the single-finding highlight (popup hover out). */
   clearHighlight(): void {
+    clearPin();
     restoreOutlines();
     hideTooltip();
+  },
+
+  /**
+   * Pin one finding: outline it, scroll it to center, and keep the tooltip
+   * showing so the popup panel can close and stop blocking the page. The
+   * tooltip follows the element while the page scrolls; a click anywhere on
+   * the page (or the next scan) dismisses it.
+   */
+  pinFinding(id: number): void {
+    clearPin();
+    restoreOutlines();
+    // Resolve via the cached element reference (survives clearHighlights()),
+    // not the DOM tag which Remove highlights strips.
+    const finding = lastFindings[id];
+    const el = finding?.element;
+    if (!el || !finding || !document.contains(el)) return;
+    pinnedId = id;
+    outlineElement(el, finding.severity);
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    const reposition = (): void => {
+      if (document.contains(el)) showTooltipFor(el, finding, { onClose: clearPin });
+      else clearPin();
+    };
+    reposition();
+    const dismiss = (): void => clearPin();
+    // `true` (capture) so the tooltip tracks scrolling inside any scroll
+    // container, not just the window. Deferred so the click that triggered the
+    // pin (in the popup window) can't immediately dismiss it.
+    window.addEventListener('scroll', reposition, true);
+    window.addEventListener('resize', reposition, true);
+    document.addEventListener('click', dismiss, true);
+    pinCleanup = (): void => {
+      window.removeEventListener('scroll', reposition, true);
+      window.removeEventListener('resize', reposition, true);
+      document.removeEventListener('click', dismiss, true);
+      restoreOutlines();
+      hideTooltip();
+      pinnedId = null;
+    };
   },
 
   /**
@@ -215,6 +312,7 @@ const api = {
 
   /** Full cleanup of overlay mode: outlines, tooltip, tags, listener. */
   clearHighlights(): void {
+    clearPin();
     restoreOutlines();
     hideTooltip();
     if (overlayListener) {

@@ -48,3 +48,21 @@ DevTools panel (inspect-element integration) is on the roadmap.
 Copy the contents of `dist/aria-reach.browser.js` and paste into the DevTools
 console of any page — it prints a grouped report and exposes
 `window.ariaReach.scan()` / `.report()` / `.summary()`.
+
+## Manual test checklist (popup)
+
+The `window.ariaReach` runtime API is covered by `test/browser.test.js` (jsdom).
+The popup's wiring depends on `chrome.tabs`/`chrome.scripting` and live event
+timing, so verify it by hand after changing `popup.js` — load unpacked, scan a
+page with several findings, then confirm:
+
+1. **Hover** a finding row → element outlines + tooltip; **mouse out** → clears.
+2. **Click** a finding → panel closes, the highlight + tooltip stay pinned, and
+   the tooltip follows the element as you scroll.
+3. **Dismiss** a pin via the tooltip **✕**, a click anywhere on the page, or a
+   new scan.
+4. **Reopen** the popup → results are restored without rescanning, and the
+   pinned row is marked/scrolled into view. **Reload the page** then reopen →
+   back to the clean prompt.
+5. **Highlight all on page** → scrolling with the pointer over the list does
+   **not** clear the highlights; clicking a row exits overlay and pins cleanly.

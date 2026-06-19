@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "aria-reach — ARIA Accessibility Scanner",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Scan pages for ARIA accessibility anti-patterns and identify likely component-library origins using DOM fingerprints.",
   "homepage_url": "https://github.com/manichandra/aria-reach",
   "icons": {

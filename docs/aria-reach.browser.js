@@ -347,9 +347,19 @@
   };
   var ATTR = "data-aria-reach-id";
   var lastFindings = [];
+  var lastSummaryCache = null;
   var savedOutlines = /* @__PURE__ */ new Map();
   var tooltipEl = null;
   var overlayListener = null;
+  var pinCleanup = null;
+  var pinnedId = null;
+  function clearPin() {
+    if (pinCleanup) {
+      const fn = pinCleanup;
+      pinCleanup = null;
+      fn();
+    }
+  }
   function tagFindings(findings) {
     for (const el of Array.from(document.querySelectorAll(`[${ATTR}]`))) {
       el.removeAttribute(ATTR);
@@ -368,10 +378,24 @@
     tooltipEl = el;
     return el;
   }
-  function showTooltipFor(target, finding) {
+  function showTooltipFor(target, finding, opts = {}) {
     const tip = ensureTooltip();
     const info = CLASS_INFO[finding.cls];
     tip.textContent = "";
+    tip.style.pointerEvents = opts.onClose ? "auto" : "none";
+    tip.style.paddingRight = opts.onClose ? "24px" : "10px";
+    if (opts.onClose) {
+      const close = document.createElement("button");
+      close.type = "button";
+      close.setAttribute("aria-label", "Dismiss");
+      close.textContent = "\xD7";
+      close.style.cssText = "position:absolute;top:1px;right:3px;background:none;border:none;color:#9ca3af;font:700 16px/1 system-ui,sans-serif;cursor:pointer;padding:2px 4px";
+      close.addEventListener("click", (e) => {
+        e.stopPropagation();
+        opts.onClose?.();
+      });
+      tip.appendChild(close);
+    }
     const head = document.createElement("div");
     head.style.cssText = `font-weight:700;color:${SEVERITY_COLORS[finding.severity] ?? "#fff"};margin-bottom:3px`;
     head.textContent = `${finding.severity.toUpperCase()} \xB7 ${finding.ruleId} \xB7 Class ${finding.cls} (${info.name})`;
@@ -439,22 +463,69 @@
     summary(root = document) {
       const findings = scanDom(root);
       tagFindings(findings);
-      return summarize(findings);
+      lastSummaryCache = summarize(findings);
+      return lastSummaryCache;
+    },
+    /** Cached summary from the last scan(), or null if the page hasn't been scanned. */
+    lastSummary() {
+      return lastSummaryCache;
+    },
+    /** Whether overlay mode (highlight-all) is currently active on the page. */
+    isOverlayOn() {
+      return overlayListener !== null;
+    },
+    /** Id of the finding currently pinned on the page, or null if none. */
+    pinnedFinding() {
+      return pinnedId;
     },
     /** Outline + scroll to one finding (popup hover). */
     highlightFinding(id) {
       restoreOutlines();
-      const el = document.querySelector(`[${ATTR}="${String(id)}"]`);
       const finding = lastFindings[id];
-      if (!el || !finding) return;
+      const el = finding?.element;
+      if (!el || !finding || !document.contains(el)) return;
       outlineElement(el, finding.severity);
       el.scrollIntoView({ block: "center", behavior: "smooth" });
       showTooltipFor(el, finding);
     },
     /** Remove the single-finding highlight (popup hover out). */
     clearHighlight() {
+      clearPin();
       restoreOutlines();
       hideTooltip();
+    },
+    /**
+     * Pin one finding: outline it, scroll it to center, and keep the tooltip
+     * showing so the popup panel can close and stop blocking the page. The
+     * tooltip follows the element while the page scrolls; a click anywhere on
+     * the page (or the next scan) dismisses it.
+     */
+    pinFinding(id) {
+      clearPin();
+      restoreOutlines();
+      const finding = lastFindings[id];
+      const el = finding?.element;
+      if (!el || !finding || !document.contains(el)) return;
+      pinnedId = id;
+      outlineElement(el, finding.severity);
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      const reposition = () => {
+        if (document.contains(el)) showTooltipFor(el, finding, { onClose: clearPin });
+        else clearPin();
+      };
+      reposition();
+      const dismiss = () => clearPin();
+      window.addEventListener("scroll", reposition, true);
+      window.addEventListener("resize", reposition, true);
+      document.addEventListener("click", dismiss, true);
+      pinCleanup = () => {
+        window.removeEventListener("scroll", reposition, true);
+        window.removeEventListener("resize", reposition, true);
+        document.removeEventListener("click", dismiss, true);
+        restoreOutlines();
+        hideTooltip();
+        pinnedId = null;
+      };
     },
     /**
      * Overlay mode: outline EVERY finding on the page (color = severity) and
@@ -479,6 +550,7 @@
     },
     /** Full cleanup of overlay mode: outlines, tooltip, tags, listener. */
     clearHighlights() {
+      clearPin();
       restoreOutlines();
       hideTooltip();
       if (overlayListener) {
